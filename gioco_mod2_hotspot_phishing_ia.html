@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>MOD2 – Trova i Segnali: Phishing generato con l'IA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:linear-gradient(135deg,#4a148c,#6a1b9a,#8e24aa);min-height:100vh;overflow:hidden;display:flex;justify-content:center;align-items:center}
+.container{width:800px;height:550px;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#4a148c,#6a1b9a);color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.header h1{font-size:15px;font-weight:700}.header p{font-size:11px;opacity:.8;margin-top:1px}
+button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;font-family:inherit}
+.btn-white{background:#fff;color:#4a148c}.btn-white:hover{background:#f3e5f5}
+.btn-outline{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4)}.btn-outline:hover{background:rgba(255,255,255,.25)}
+.btn-group{display:flex;gap:8px}
+.hidden{display:none!important}
+.page{flex:1;display:flex;flex-direction:column;min-height:0}
+
+/* Intro */
+.instr{padding:18px 26px;overflow-y:auto;flex:1}
+.instr h2{font-size:22px;color:#4a148c;margin-bottom:10px}
+.instr p{font-size:16px;line-height:1.6;color:#444;margin-bottom:8px}
+.how-grid{display:flex;gap:10px;margin:14px 0}
+.how-step{flex:1;background:#f3e5f5;border-radius:8px;padding:10px;text-align:center;font-size:16px;color:#4a148c;font-weight:600;line-height:1.5}
+.how-step .num{font-size:22px;display:block;margin-bottom:4px}
+.start-btn{background:linear-gradient(135deg,#4a148c,#6a1b9a);color:#fff;padding:11px 32px;font-size:14px;border-radius:8px;display:block;margin:16px auto 0;cursor:pointer;border:none;font-weight:600}
+.start-btn:hover{transform:translateY(-2px)}
+
+/* Game */
+.status-bar{display:flex;align-items:center;gap:16px;padding:7px 14px;background:#f5f5f5;border-bottom:1px solid #e0e0e0;flex-shrink:0;font-size:12px;color:#555}
+.found-badge{background:#4a148c;color:#fff;border-radius:20px;padding:2px 12px;font-size:12px;font-weight:700}
+.lives{display:flex;gap:3px;font-size:13px}
+.content{flex:1;display:flex;overflow:hidden;min-height:0}
+.mail-area{flex:1.5;position:relative;overflow:hidden;background:#f3e5f5;padding:14px}
+.mail-card{position:relative;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.12);padding:12px 14px;font-size:14px;color:#333;line-height:1.55;height:100%;overflow:hidden}
+.mail-row{display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #eee;font-size:11.5px}
+.mail-row b{color:#666;width:52px;flex-shrink:0}
+.mail-subject{font-weight:700;font-size:11.5px;color:#222;margin:8px 0 6px}
+.mail-body p{margin-bottom:7px}
+.mail-btn{display:inline-block;background:#4a148c;color:#fff;padding:6px 16px;border-radius:5px;font-size:13px;font-weight:700;margin:4px 0}
+.mail-sign{color:#666;font-size:11.5px;margin-top:6px}
+.hotspot{position:absolute;border-radius:6px;background:none;border:none;transition:all .2s}
+.hotspot:hover{background:none}
+.hotspot.found{background:rgba(46,125,50,.16);border:2.5px solid #2e7d32;cursor:default}
+.panel{flex:1;display:flex;flex-direction:column;padding:10px 12px;gap:7px;border-left:1px solid #e0e0e0;overflow-y:auto;background:#fafafa}
+.panel h2{font-size:13px;font-weight:700;color:#4a148c}
+.error-list{display:flex;flex-direction:column;gap:5px;flex:1}
+.error-item{background:#fff;border:2px solid #e0e0e0;border-radius:7px;padding:7px 10px;font-size:12px;color:#777;line-height:1.4;transition:all .3s}
+.error-item.found-item{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600}
+.error-item.found-item::before{content:'✓ '}
+.hint-box{background:#f3e5f5;border-left:3px solid #6a1b9a;border-radius:5px;padding:7px 9px;font-size:12px;color:#4a148c;line-height:1.5}
+.popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:500}
+.popup-box{background:#fff;border-radius:10px;padding:20px 22px;max-width:400px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.popup-box h3{color:#4a148c;font-size:14px;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:7px}
+.popup-box p{font-size:12px;line-height:1.6;color:#444}
+.popup-close{background:linear-gradient(135deg,#4a148c,#6a1b9a);color:#fff;padding:8px 22px;font-size:13px;border-radius:7px;width:100%;margin-top:14px;cursor:pointer;border:none;font-weight:600}
+
+/* Result */
+.result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#4a148c,#6a1b9a)}
+.result h2{color:#fff;font-size:24px;font-weight:700}
+.result .emoji{font-size:54px}
+.result p{color:#e1bee7;font-size:13px;text-align:center;max-width:400px;line-height:1.6}
+.result-stats{display:flex;gap:10px}
+.result-stat{background:rgba(255,255,255,.15);border-radius:8px;padding:8px 18px;color:#fff;font-size:14px;font-weight:700;text-align:center}
+.result-stat span{display:block;font-size:10px;opacity:.8;margin-bottom:2px}
+.btn-again{background:#fff;color:#4a148c;padding:9px 26px;font-size:13px;border-radius:8px;font-weight:700;margin-top:4px;cursor:pointer;border:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div><h1>🤖 Trova i Segnali – Phishing generato con l'IA</h1><p>Modulo 2 – IA generativa e rischi cyber</p></div>
+    <div class="btn-group">
+      <button class="btn-outline" onclick="resetGame()">🔄 Rigioca</button>
+      <button class="btn-white" onclick="window.close()">Torna al corso</button>
+    </div>
+  </div>
+
+  <div id="instrPage" class="page">
+    <div class="instr">
+      <h2>Un'email perfetta può comunque essere una truffa</h2>
+      <p>L'intelligenza artificiale generativa permette ai truffatori di scrivere email impeccabili, senza gli errori grammaticali che un tempo aiutavano a smascherarle. Il testo non basta più: devi imparare a leggere anche mittente, tono e struttura del messaggio.</p>
+      <p>Qui sotto trovi un'email ricostruita. Contiene 5 segnali che rivelano il tentativo di phishing, anche se il testo è scritto perfettamente. Trovali tutti.</p>
+      <div class="how-grid">
+        <div class="how-step"><span class="num">👀</span>Osserva mittente, testo e pulsanti dell'email</div>
+        <div class="how-step"><span class="num">🖱️</span>Clicca sui punti che ti sembrano sospetti</div>
+        <div class="how-step"><span class="num">💡</span>Leggi la spiegazione di ogni segnale trovato</div>
+      </div>
+      <button class="start-btn" onclick="startGame()">▶ Inizia</button>
+    </div>
+  </div>
+
+  <div id="gamePage" class="page hidden">
+    <div class="status-bar">
+      <span class="found-badge">Trovati: <span id="foundCount">0</span>/5</span>
+      <span>Errori: <b id="errCount" style="color:#c62828">0</b></span>
+      <div class="lives" id="livesEl"></div>
+      <span style="margin-left:auto;font-size:11px;color:#888">Clicca sui punti sospetti nell'email</span>
+    </div>
+    <div class="content">
+      <div class="mail-area" id="mailArea">
+        <div class="mail-card">
+          <div class="mail-row"><b>Da:</b> Supporto Microsoft &lt;support@micros0ft-security.com&gt;</div>
+          <div class="mail-row"><b>A:</b> tu@azienda.it</div>
+          <div class="mail-subject">⚠️ Azione richiesta: verifica immediata del tuo account</div>
+          <div class="mail-body">
+            <p>Gentile utente,</p>
+            <p>abbiamo rilevato un accesso sospetto al tuo account Microsoft da parte diun dispositivo non riconosciuto. Per garantire la sicurezza dei tuoi dati, ti chiediamo di confermare la tua identità entro le prossime 2 ore, altrimenti l'account verrà sospeso automaticamente.</p>
+            <p>Per completare la verifica, rispondi a questa email indicando la tua password attuale e il codice a 6 cifre che riceverai via SMS.</p>
+            <p>In alternativa, clicca sul pulsante in basso per procedere alla riattivazione. Ti verrà richiesto nome utente e password.</p>
+            <div class="mail-btn">Verifica il tuo account</div>
+            <p class="mail-sign">Cordiali saluti,<br>Il team sicurezza Microsoft</p>
+          </div>
+        </div>
+        <!-- HOTSPOT 1: mittente typosquat -->
+        <div class="hotspot" data-id="1" style="top:31px;left:226px;width:160px;height:25px"
+             data-title="Dominio del mittente falsificato"
+             data-text="L'indirizzo è 'micros0ft-security.com', con uno zero al posto della 'o' e un dominio che Microsoft non usa. Un tempo questi errori erano più facili da notare; oggi l'IA aiuta a costruire domini e firme quasi identiche a quelle originali. Controlla sempre l'indirizzo completo del mittente, non solo il nome visualizzato."></div>
+        <!-- HOTSPOT 2: saluto generico -->
+        <div class="hotspot" data-id="2" style="top:107px;left:26px;width:95px;height:20px"
+             data-title="Saluto generico, non personalizzato"
+             data-text="'Gentile utente' invece del tuo nome: chi ti scrive non ha (o non usa) i tuoi dati reali. Un servizio con cui hai davvero un account di solito ti si rivolge per nome. L'IA rende il testo fluente, ma non colma da sola l'assenza di dati personali reali sul destinatario."></div>
+        <!-- HOTSPOT 3: urgenza artificiale -->         
+        <div class="hotspot" data-id="3" style="top:205px;left:26px;width:110px;height:18px"
+             data-title="Urgenza artificiale e minaccia"
+             data-text="'Entro le prossime 2 ore' e la minaccia di sospensione automatica servono a farti agire d'istinto, senza verificare. È una leva psicologica classica del phishing, che l'IA sa riprodurre in un linguaggio perfettamente professionale e quindi ancora più credibile."></div>
+        <!-- HOTSPOT 4: richiesta dati sensibili -->
+        <div class="hotspot" data-id="4" style="top:302px;left:217px;width:155px;height:28px"
+             data-title="Richiesta di dati sensibili nel testo dell'email"
+             data-text="Nessun servizio reale chiede la password senza accedere al sito o canale ufficiale. Una password ti autentica proprio perché resta solo tua: se qualcuno te la chiede in un messaggio, vuole rubartela, non verificarla."></div>
+        <!-- HOTSPOT 5: canale di risposta anomalo -->
+        <div class="hotspot" data-id="5" style="top:232px;left:26px;width:410px;height:40px"
+             data-title="Canale di risposta anomalo, non il portale ufficiale"
+             data-text="Ti viene chiesto di rispondere direttamente all'email invece di accedere al sito o all'app ufficiale, l'unico canale davvero sicuro per gestire un account. Aggirare il canale ufficiale è una scelta studiata apposta per evitare i controlli che un vero portale applicherebbe."></div>
+      </div>
+      <div class="panel">
+        <h2>🚩 Segnali da trovare</h2>
+        <div class="error-list">
+          <div class="error-item" id="ei-1">Segnale 1</div>
+          <div class="error-item" id="ei-2">Segnale 2</div>
+          <div class="error-item" id="ei-3">Segnale 3</div>
+          <div class="error-item" id="ei-4">Segnale 4</div>
+          <div class="error-item" id="ei-5">Segnale 5</div>
+        </div>
+        <div class="hint-box">📌 Hai 5 tentativi a vuoto a disposizione: clicca con attenzione.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultPage" class="page hidden">
+    <div class="result">
+      <div class="emoji" id="resEmoji">🏆</div>
+      <h2 id="resTitle">Ottimo lavoro!</h2>
+      <p id="resText">Hai individuato tutti i segnali.</p>
+      <div class="result-stats">
+        <div class="result-stat"><span>Trovati</span><span id="resFound">0/5</span></div>
+        <div class="result-stat"><span>Errori</span><span id="resErr">0</span></div>
+      </div>
+      <button class="btn-again" onclick="resetGame()">🔄 Rigioca</button>
+    </div>
+  </div>
+</div>
+<script>
+const MAX_LIVES=5;
+let found=[],errors=0,lives=MAX_LIVES;
+
+function startGame(){
+  document.getElementById('instrPage').classList.add('hidden');
+  document.getElementById('gamePage').classList.remove('hidden');
+  initGame();
+}
+function initGame(){
+  found=[];errors=0;lives=MAX_LIVES;
+  document.getElementById('foundCount').textContent='0';
+  document.getElementById('errCount').textContent='0';
+  document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('found'));
+  document.querySelectorAll('.error-item').forEach((e,i)=>{e.classList.remove('found-item');e.textContent='Segnale '+(i+1);});
+  renderLives();
+  setupHotspots();
+  setupMissClick();
+}
+function renderLives(){const el=document.getElementById('livesEl');el.innerHTML='';for(let i=0;i<MAX_LIVES;i++){const s=document.createElement('span');s.textContent=i<lives?'❤️':'🖤';el.appendChild(s);}}
+function setupHotspots(){
+  document.querySelectorAll('.hotspot').forEach(h=>{
+    h.onclick=(e)=>{
+      e.stopPropagation();
+      const id=parseInt(h.dataset.id);
+      if(found.includes(id))return;
+      found.push(id);
+      h.classList.add('found');
+      const ei=document.getElementById('ei-'+id);
+      ei.classList.add('found-item');
+      ei.textContent='Segnale '+id+' – '+h.dataset.title;
+      document.getElementById('foundCount').textContent=found.length;
+      showPopup(h.dataset.title,h.dataset.text);
+    };
+  });
+}
+function setupMissClick(){
+  document.getElementById('mailArea').onclick=(e)=>{
+    if(e.target.classList.contains('hotspot')||e.target.closest('.hotspot'))return;
+    errors++;
+    lives=Math.max(0,lives-1);
+    document.getElementById('errCount').textContent=errors;
+    renderLives();
+    if(lives<=0)endGame();
+  };
+}
+function showPopup(title,text){
+  const overlay=document.createElement('div');
+  overlay.className='popup';
+  overlay.innerHTML=`<div class="popup-box"><h3>🚩 ${title}</h3><p>${text}</p><button class="popup-close" onclick="this.closest('.popup').remove();checkDone()">Ho capito – Continua</button></div>`;
+  document.body.appendChild(overlay);
+}
+function checkDone(){if(found.length===5)endGame();}
+function endGame(){
+  const pct=found.length/5;
+  document.getElementById('resFound').textContent=found.length+'/5';
+  document.getElementById('resErr').textContent=errors;
+  const emojiEl=document.getElementById('resEmoji'),titleEl=document.getElementById('resTitle'),textEl=document.getElementById('resText');
+  if(pct>=0.8){
+    emojiEl.textContent='🏆';titleEl.textContent='Ottimo lavoro!';
+    textEl.textContent="Hai riconosciuto i segnali di un'email costruita con l'IA: mittente falsificato, saluto generico, urgenza artificiale, richiesta di dati sensibili e un canale di risposta anomalo.";
+  }else if(pct>=0.5){
+    emojiEl.textContent='👍';titleEl.textContent='Buon lavoro';
+    textEl.textContent="Hai trovato diversi segnali, ma qualcuno ti è sfuggito. Ricontrolla sempre mittente, saluto, tono e a cosa ti viene chiesto di rispondere.";
+  }else{
+    emojiEl.textContent='💪';titleEl.textContent='Riprova';
+    textEl.textContent="Il testo di un'email non basta più a giudicarne l'autenticità. Rigioca e osserva con calma mittente, saluto, tono e richieste contenute nel messaggio.";
+  }
+  document.getElementById('gamePage').classList.add('hidden');
+  document.getElementById('resultPage').classList.remove('hidden');
+}
+function resetGame(){
+  document.querySelectorAll('.popup').forEach(p=>p.remove());
+  document.getElementById('resultPage').classList.add('hidden');
+  document.getElementById('gamePage').classList.add('hidden');
+  document.getElementById('instrPage').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
